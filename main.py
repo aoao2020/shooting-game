@@ -215,8 +215,38 @@ class ShootingGame:
         self.master.bind("<space>", self.restart_game)
     
     def restart_game(self, event):
-        self.master.destroy()
-        start_game()
+        # 既存のゲームオブジェクトをクリア
+        for enemy in self.enemies[:]:
+            self.canvas.delete(enemy)
+        for bullet in self.bullets[:]:
+            self.canvas.delete(bullet)
+        self.enemies.clear()
+        self.bullets.clear()
+        
+        # ゲーム変数を初期化
+        self.score = 0
+        self.game_over = False
+        
+        # プレイヤーの位置を初期位置に戻す
+        self.canvas.delete(self.player)
+        self.player_x = 400
+        self.player_y = 550
+        self.player = self.create_gun(self.player_x, self.player_y)
+        
+        # スコアの表示をリセット
+        self.canvas.itemconfig(self.score_text, text=f"SCORE: {self.score}")
+        
+        # ゲームオーバーのテキストを削除
+        for item in self.canvas.find_all():
+            if self.canvas.type(item) == "text" and "GAME OVER" in self.canvas.itemcget(item, "text"):
+                self.canvas.delete(item)
+        
+        # ゲームループを再開
+        self.spawn_enemy()
+        self.update()
+        
+        # スペースキーをシュートに再バインド
+        self.master.bind("<space>", self.shoot)
 
 def start_game():
     root = tk.Tk()
